@@ -1,0 +1,1305 @@
+{
+  "info": {
+    "_postman_id": "5ce80e33-7ee6-4ac4-9fc5-23268dd53904",
+    "name": "Library of Congress (loc.gov) API — incl. Chronicling America",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "loc.gov JSON/YAML API — search, collections, formats, items and resources across the Library of Congress digital collections, including **Chronicling America** historic newspapers (now loc.gov-only), Sanborn maps, photos and manuscripts. No key.\n\n**Rate limit: 20 requests/minute** for the JSON API (exceeding it blocks you for 1 hour; heavy load may return 429 or a CAPTCHA page). Text/image services: 150/min.\n\nDocs: https://www.loc.gov/apis/json-and-yaml/ · Parameters: https://www.loc.gov/apis/json-and-yaml/requests/parameters/"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if(pm.response.code===429) console.warn('429 from loc.gov — pause; limit is 20 requests/minute (1-hour block if exceeded).');",
+          "if((pm.response.headers.get('Content-Type')||'').includes('text/html')) console.warn('HTML returned — possibly a CAPTCHA/rate-limit page. Slow down.');"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "★ Chronicling America (newspapers)",
+      "id": "29d8a1aa-bc91-4ca6-8ed9-18a20f88e337",
+      "item": [
+        {
+          "name": "Chronicling America — full-text search (pages)",
+          "id": "118736e7-5eb3-481b-97e7-f3b076c7a18e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q={{query}}&dl=page&dates={{date_range}}&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dl",
+                  "value": "page",
+                  "disabled": false,
+                  "description": "page = one result per newspaper page"
+                },
+                {
+                  "key": "dates",
+                  "value": "{{date_range}}",
+                  "disabled": false,
+                  "description": "YYYY/YYYY"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "e.g. location_state:new york  ·  location_city:new york  ·  partof_title:the sun (new york [n.y.]) 1833-1916  ·  subject_ethnicity:hungarians"
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": "Historic US newspaper pages 1756–1963 with OCR full text. Since 2025 Chronicling America is served only through the loc.gov API (the old chroniclingamerica.loc.gov API is retired)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "★ Bukovsky in US newspapers (982 pages at build time)",
+          "id": "437f30cf-2138-4de1-acab-17a49e04ed18",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q=Bukovsky&dl=page&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Bukovsky",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dl",
+                  "value": "page",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Facets at build time: mostly Maryland and Ohio papers, 1910s–1950s."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "★ Bukovsky 1900–1919",
+          "id": "a7fe4159-3db5-4b9e-80c3-7db04962cb59",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q=Bukovsky&dates=1900/1919&dl=page&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Bukovsky",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dates",
+                  "value": "1900/1919",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dl",
+                  "value": "page",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "★ Barna 1900–1930, New York papers",
+          "id": "a400c15d-4473-498b-87a0-9607dbb03392",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q=Barna&dates=1900/1930&fa=location_state:new york&dl=page&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Barna",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dates",
+                  "value": "1900/1930",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fa",
+                  "value": "location_state:new york",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dl",
+                  "value": "page",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "★ Krupl / Krupel",
+          "id": "7f99da55-161f-4130-833e-60e0f7c4b721",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q=Krupl OR Krupel&dl=page&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Krupl OR Krupel",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dl",
+                  "value": "page",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "★ \"Barbarossa\" arrivals, March 1905",
+          "id": "5a1e000e-be9f-4639-b751-616d3206673c",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q=Barbarossa Bremen&dates=1905/1905&dl=page&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Barbarossa Bremen",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dates",
+                  "value": "1905/1905",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "dl",
+                  "value": "page",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Shipping news for the S.S. Barbarossa (left Bremen 11 Mar 1905, arrived NY 23–24 Mar 1905)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Facet counts for a search (where/when?)",
+          "id": "b7286b86-7125-4439-8729-e44ff06a7581",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/chronicling-america/?q={{query}}&fo=json&c=1&at=facets,pagination",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "chronicling-america",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "1",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "at",
+                  "value": "facets,pagination",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Counts by state, city, decade, newspaper title, ethnicity — decide where to dig."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Core loc.gov endpoints",
+      "id": "f5dd5245-7dc4-4035-9322-2dce62e8511d",
+      "item": [
+        {
+          "name": "Search everything",
+          "id": "d04869e8-b999-4775-b957-7df64bf10c7b",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/search/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "search",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": "Searches all of loc.gov — collection items, web pages, legislation etc. q is required."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List digital collections",
+          "id": "806039d0-d3dd-47ad-adf5-db1f237e0454",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/?fo=json&at=results,pagination&c=100",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "at",
+                  "value": "results,pagination",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "100",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "All digitized collections (slugs used in the next request)."
+          },
+          "response": []
+        },
+        {
+          "name": "Search within a collection",
+          "id": "5cb4e806-170b-4284-9e3c-a38d3ca8d86e",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/{{collection}}/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "{{collection}}",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": "Collection slug in kebab-case, e.g. chronicling-america, sanborn-maps, civil-war-maps."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search by format",
+          "id": "dc612863-94aa-4627-949f-040f97b9dac9",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/{{format}}/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "{{format}}",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": "format: audio | books | film-and-videos | legislation | manuscripts | maps | newspapers | photos | notated-music | web-archives"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Item (full bibliographic record)",
+          "id": "cc86e76a-4113-420b-aedb-30024c5c24b0",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/item/{{item_id}}/?fo=json",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "item",
+                "{{item_id}}",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "at",
+                  "value": "item,resources",
+                  "disabled": true,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "item_id from the id/url of a search result, e.g. https://www.loc.gov/item/{item_id}/"
+          },
+          "response": []
+        },
+        {
+          "name": "Resource (digitized files, pages, full text links)",
+          "id": "0f8c8c34-3355-4f43-80c7-d4831299da76",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/resource/{{resource_id}}/?fo=json",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "resource",
+                "{{resource_id}}",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "resource_id from item.resources[].url, e.g. a newspaper page."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Other genealogy-useful collections",
+      "id": "f32e5f29-7af7-4ac5-88ed-14222d96246d",
+      "item": [
+        {
+          "name": "Sanborn fire-insurance maps — New York City",
+          "id": "00ab7e98-bd42-4b90-a474-cd712f833f99",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/collections/sanborn-maps/?q=new york&fa=location_city:new york&fo=json&c=50",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "collections",
+                "sanborn-maps",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "new york",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fa",
+                  "value": "location_city:new york",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "c",
+                  "value": "50",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Building-level maps; find the sheet covering an ancestor’s street (e.g. 30 Greenwich St)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Photos, prints, drawings",
+          "id": "a23015ec-6800-422d-9b6c-d2a68f3e527d",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/photos/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "photos",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Maps",
+          "id": "0054b70c-3183-412a-b645-16b9bdceed7b",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/maps/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "maps",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Manuscripts / mixed material",
+          "id": "aedc58bf-b1ad-472b-adb9-dd77aa54c0f9",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/manuscripts/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "manuscripts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Books / printed material (digitized)",
+          "id": "0bde2459-e5d2-45d7-bb3e-d9e9cda4660f",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{loc}}/books/?q={{query}}&fo=json&c=25",
+              "host": [
+                "{{loc}}"
+              ],
+              "path": [
+                "books",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "fo",
+                  "value": "json",
+                  "disabled": false,
+                  "description": "json | yaml"
+                },
+                {
+                  "key": "c",
+                  "value": "25",
+                  "disabled": false,
+                  "description": "results per page (default 25)"
+                },
+                {
+                  "key": "sp",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "page number (1-based)"
+                },
+                {
+                  "key": "at",
+                  "value": "",
+                  "disabled": true,
+                  "description": "only these attributes, e.g. pagination,results — or at!=more_like_this to exclude"
+                },
+                {
+                  "key": "sb",
+                  "value": "",
+                  "disabled": true,
+                  "description": "date | date_desc | title_s | title_s_desc | shelf_id | shelf_id_desc"
+                },
+                {
+                  "key": "fa",
+                  "value": "",
+                  "disabled": true,
+                  "description": "facet filter name:value, pipe-separated, e.g. location_state:ohio|subject:wildlife"
+                }
+              ]
+            },
+            "description": "City directories, county histories, etc. that LoC has digitized."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let j={};try{j=pm.response.json();}catch(e){}",
+                  "const res=j.results||[];const p=j.pagination||{};",
+                  "const rows=res.map(x=>[`<a href=\"${x.url||x.id}\">${(x.title||'').slice(0,120)}</a>`,x.date||'',(x.partof_title||x.partof||[]).slice?(x.partof_title||[]).join('; ').slice(0,80):'',(x.location_state||x.location||[]).join?(x.location_state||x.location||[]).slice(0,3).join(', '):'',(x.original_format||[]).join?x.original_format.join(', '):'']);",
+                  "pm.visualizer.set(`<style>table{border-collapse:collapse;font:13px sans-serif}td,th{border:1px solid #ccc;padding:4px 8px;vertical-align:top}th{background:#eee}</style><p>{{total}} total · page {{page}} of {{pages}}</p><table><tr><th>Title</th><th>Date</th><th>Newspaper / part of</th><th>Location</th><th>Format</th></tr>{{#each rows}}<tr>{{#each this}}<td>{{{this}}}</td>{{/each}}</tr>{{/each}}</table>`,{rows,total:p.of,page:p.current,pages:p.total});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "LC Name Authority suggest (id.loc.gov)",
+          "id": "e1dce2dc-6c02-45a3-9f2c-80beef070013",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{id_loc}}/authorities/names/suggest2?q={{query}}&count=20",
+              "host": [
+                "{{id_loc}}"
+              ],
+              "path": [
+                "authorities",
+                "names",
+                "suggest2"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "{{query}}",
+                  "disabled": false,
+                  "description": ""
+                },
+                {
+                  "key": "count",
+                  "value": "20",
+                  "disabled": false,
+                  "description": ""
+                }
+              ]
+            },
+            "description": "Linked Data Service — authorised name headings (people, families, places)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "loc",
+      "value": "https://www.loc.gov",
+      "type": "string"
+    },
+    {
+      "key": "id_loc",
+      "value": "https://id.loc.gov",
+      "type": "string"
+    },
+    {
+      "key": "query",
+      "value": "Bukovsky",
+      "type": "string"
+    },
+    {
+      "key": "collection",
+      "value": "chronicling-america",
+      "type": "string"
+    },
+    {
+      "key": "format",
+      "value": "newspapers",
+      "type": "string"
+    },
+    {
+      "key": "date_range",
+      "value": "1900/1930",
+      "type": "string"
+    },
+    {
+      "key": "item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resource_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
